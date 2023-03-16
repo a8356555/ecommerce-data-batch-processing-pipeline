@@ -20,9 +20,9 @@ We will be using Airflow to orchestrate
 
 ## Adding Extra Airflow Steps
 1. Install ElasticSearch on EC2
-2. Calculate recommendataion embedding of products using AWS EMR and save to S3
+2. Calculate recommendation embedding of products using AWS EMR and save to S3
    * TODO: is there a way that EMR can save results to OpenSearch directly
-3. Load recommendataion embedding from S3 to EC2 ElasticSearch
+3. Load recommendation embedding from S3 to EC2 ElasticSearch
 
 ## Serving 
 * Build a real-time recommendation api using fastapi and elasticsearch
