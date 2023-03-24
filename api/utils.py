@@ -53,12 +53,12 @@ def _vector_query(query_vec, country, vector_field, similarity_type='cosine'):
     }
 
 
-def get_recommendation(es, the_id, rec_num=10, index="products", vector_field='model_factor'):
+def get_recommendation(es, target_item_id, rec_num=10, index="products", vector_field='model_factor'):
     """
     Given a item id, execute the recommendation script score query to find similar items,
     ranked by cosine similarity. We return the `rec_num` most similar, excluding the item itself.
     """
-    response = es.get(index=index, id=the_id)
+    response = es.get(index=index, id=target_item_id)
     src = response['_source']
     if vector_field in src:
         query_vec = src[vector_field]

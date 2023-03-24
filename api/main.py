@@ -14,10 +14,10 @@ def get_es():
     es = Elasticsearch(endpoint)
     return es
 
-@app.post("/recommend_product")
-def recommend_product(recommend_request: RecommendRequest):
+@app.post("/recommend_similar_product")
+def recommend_similar_product(recommend_request: RecommendRequest):
     es = get_es()
-    product, recs = get_recommendation(es, recommend_request.id, num=recommend_request.rec_num, index='products')
+    product, recs = get_recommendation(es, recommend_request.item_id, num=recommend_request.rec_num, index='products')
     recommendations = []
     for rec in recs:
         r = {}
