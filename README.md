@@ -25,6 +25,8 @@ a. Install ElasticSearch on EMR
 b. Calculate recommendataion embedding of products using AWS EMR and save to EMR ES
    * TODO: is there a way that EMR can save results to OpenSearch directly
 c. recommendation api query EMR ES
+d. (optional) use single store https://medium.com/@VeryFatBoy/using-singlestore-spark-and-alternating-least-squares-als-to-build-a-movie-recommender-system-6e74f4e5908d
+
 
 ### 2. Recommendataion api serving 
 * Build a real-time recommendation api using fastapi and elasticsearch
@@ -55,3 +57,11 @@ c. recommendation api query EMR ES
      ![](assets/images/QXRq2.png)
 
    * how to make terraform aws_security_group type = Redshift???
+4. Error4: elasticsearch spark error
+
+          An error occurred while calling o434.save.: org.elasticsearch.hadoop.EsHadoopIllegalArgumentException: Cannot detect ES version - typically this happens if the network/Elasticsearch cluster is not accessible or when targeting a WAN/Cloud instance without the proper setting 'es.nodes.wan.only'
+          // log in docker
+          received plaintext http traffic on an https channel, closing connection Netty4HttpChannel{localAddress=/172.21.0.2:9200, remoteAddress=/172.21.0.1:5600  
+   * disable security
+  
+          docker run --name es01 --net elastic --memory=8g -p 9200:9200 -e "xpack.security.enabled=false" -e "node.name=node-1" -e "cluster.initial_master_nodes=node-1" -it docker.elastic.co/elasticsearch/elasticsearch:8.6.1 
