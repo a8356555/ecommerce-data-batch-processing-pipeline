@@ -7,11 +7,13 @@ from utils import get_recommendation
 
 ES_HOST = os.env['ES_HOST']
 ES_PORT = os.env['ES_PORT']
+ES_USER = os.env['ES_USER']
+ES_PASSWORD = os.env['ES_PASSWORD']
 app = FastAPI()
 
 def get_es():
-    endpoint = f'http://{ES_HOST}:{ES_PORT}'
-    es = Elasticsearch(endpoint)
+    address = f'http://{ES_HOST}:{ES_PORT}'
+    es = Elasticsearch(hosts=[address], http_auth=(ES_USER, ES_PASSWORD), verify_certs=False)
     return es
 
 @app.post("/recommend_similar_product")
