@@ -36,13 +36,13 @@ variable "auto_termination_timeoff" {
 variable "redshift_user" {
   description = "AWS user name for Redshift"
   type        = string
-  default     = "alande_user"
+  default     = "#TODO:REVISE_USER"
 }
 
 variable "redshift_password" {
   description = "AWS password for Redshift"
   type        = string
-  default     = "alandeP0ssword0987"
+  default     = "#TODO:REVISE_PASSWORD"
 }
 
 variable "redshift_node_type" {
@@ -53,7 +53,7 @@ variable "redshift_node_type" {
 
 variable "my_ip" {
   type        = string
-  default     = "114.32.169.28/32"
+  default     = "#TODO:my_ip"
 }
 
 variable "es_domain" {

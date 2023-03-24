@@ -15,13 +15,13 @@ output "redshift_dns_name" {
 
 output "redshift_user" {
   description = "Redshift User name."
-  value       = "alande_user"
+  value       = "#TODO:REVISE_USER"
 }
 
 
 output "redshift_password" {
   description = "Redshift password."
-  value       = "alandeP0ssword0987"
+  value       = "#TODO:REVISE_PASSWORD"
 }
 
 output "ec2_public_dns" {
