@@ -8,7 +8,7 @@
   - [ERROR HANDLING](#error-handling)
 
 ## Design
-![Data pipeline design](assets/images/de_proj_design.png)
+![Data pipeline design](assets/images/new_design.png)
 
 We will be using Airflow to orchestrate
 
@@ -21,15 +21,17 @@ We will be using Airflow to orchestrate
 
 ## Extra Features
 ### 1. Adding Extra Airflow Steps
-a. Install ElasticSearch on EMR
-b. Calculate recommendataion embedding of products using AWS EMR and save to EMR ES
+a. Install ElasticSearch on EMR #TODO: modify terraform EMR
+b. Calculate recommendataion embedding of products using AWS EMR and save to EMR ES #TODO: modify spark submit jar file
    * TODO: is there a way that EMR can save results to OpenSearch directly
+
 c. recommendation api query EMR ES
-d. (optional) use single store https://medium.com/@VeryFatBoy/using-singlestore-spark-and-alternating-least-squares-als-to-build-a-movie-recommender-system-6e74f4e5908d
+d. (optional) use singlestore https://medium.com/@VeryFatBoy/using-singlestore-spark-and-alternating-least-squares-als-to-build-a-movie-recommender-system-6e74f4e5908d
+
 
 
 ### 2. Recommendataion api serving 
-* Build a real-time recommendation api using fastapi and elasticsearch
+* Build a real-time recommendation api using fastapi and elasticsearch or singlestore
 
 ### 3. Spark data skew analysis and optimization
 * TODO
