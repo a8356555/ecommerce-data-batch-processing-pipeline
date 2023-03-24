@@ -1,4 +1,4 @@
-def _vector_query(query_vec, category,vector_field, cosine=False):
+def _vector_query(query_vec, country, vector_field, similarity_type='cosine'):
     """
     Construct an Elasticsearch script score query using `dense_vector` fields
     
@@ -12,8 +12,8 @@ def _vector_query(query_vec, category,vector_field, cosine=False):
         The field name in the document against which to score `query_vec`
     q : str, optional
         Query string for the search query (default: '*' to search across all documents)
-    cosine : bool, optional
-        Whether to compute cosine similarity. If `False` then the dot product is computed (default: False)
+    similarity_type : str
+        which similarity_type to use (default: `cosine`))
      
     Note: Elasticsearch cannot rank negative scores. Therefore, in the case of the dot product, a sigmoid transform
     is applied. In the case of cosine similarity, 1.0 is added to the score. In both cases, documents with no 
@@ -23,7 +23,7 @@ def _vector_query(query_vec, category,vector_field, cosine=False):
     or product factor vector (if generating similar items for a given item)
     """
     
-    if cosine:
+    if similarity_type == 'cosine':
         score_fn = "doc['{v}'].size() == 0 ? 0 : cosineSimilarity(params.vector, '{v}') + 1.0"
     else:
         score_fn = "doc['{v}'].size() == 0 ? 0 : sigmoid(1, Math.E, -dotProduct(params.vector, '{v}'))"
@@ -37,7 +37,7 @@ def _vector_query(query_vec, category,vector_field, cosine=False):
                     "bool" : {
                         "filter" : {
                                 "term" : {
-                                "main_category" : category
+                                    "country" : country
                                 }
                             }
                     }
@@ -62,11 +62,10 @@ def get_recommendation(es, the_id, rec_num=10, index="products", vector_field='m
     src = response['_source']
     if vector_field in src:
         query_vec = src[vector_field]
-        category = src['main_category']
-        q = _vector_query(query_vec, category,vector_field, cosine=True)
-#         print(q)
+        country = src['country']
+        q = _vector_query(query_vec, country,vector_field, cosine=True)
         results = es.search(index=index, body=q)
         hits = results['hits']['hits']
-        return src,hits[1:rec_num+1]
+        return src,hits[1:rec_num+1] # the first item is itself
     else:
         return None, None

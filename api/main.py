@@ -21,8 +21,9 @@ def recommend_product(recommend_request: RecommendRequest):
     recommendations = []
     for rec in recs:
         r = {}
-        r['asin'] = rec['_source']['asin']
-        r['title'] = rec['_source']['title']
+        r['item_id'] = rec['_source']['item_id']
+        r['description'] = rec['_source']['description']
+        r['country'] = rec['_source']['country']
         r['score'] = rec['_score']
         recommendations.append(r)
     return recommendations
