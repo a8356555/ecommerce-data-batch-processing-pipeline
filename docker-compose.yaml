@@ -139,5 +139,17 @@ services:
     ports:
       - "3000:3000"
 
+
+  product_recommendation_api:
+    image: product_recommendation_api
+    build: 
+      context: ./containers/product_recommendataion_api/
+    restart: always
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./api/logs:/api/logs
+
+
 volumes:
   postgres-db-volume:

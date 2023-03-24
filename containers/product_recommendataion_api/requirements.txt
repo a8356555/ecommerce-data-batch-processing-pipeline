@@ -1,0 +1,18 @@
+# project structure lint
+flake8
+yapf
+pre-commit
+
+# unit test
+pytest
+
+# project
+fastapi==0.68.1
+elasticsearch==8.6.2
+python-dotenv==0.19.0
+requests==2.26.0
+pydantic==1.8.2
+
+# fastapi dependency
+uvicorn[standard]==0.13.4
+python-multipart==0.0.5

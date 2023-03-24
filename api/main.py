@@ -4,6 +4,10 @@ from models import RecommendRequest
 
 from elasticsearch import Elasticsearch
 from utils import get_recommendation
+from dotenv import find_dotenv, load_dotenv
+
+load_dotenv(find_dotenv())
+
 
 ES_HOST = os.env['ES_HOST']
 ES_PORT = os.env['ES_PORT']
