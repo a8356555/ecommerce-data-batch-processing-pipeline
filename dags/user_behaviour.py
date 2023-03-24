@@ -16,9 +16,13 @@ from airflow.operators.python import PythonOperator
 # Config
 BUCKET_NAME = Variable.get("BUCKET")
 EMR_ID = Variable.get("EMR_ID")
-EMR_STEPS = {}
+EMR_CLEAN_REVIEW_STEPS = {}
 with open("./dags/scripts/emr/clean_movie_review.json") as json_file:
-    EMR_STEPS = json.load(json_file)
+    EMR_CLEAN_REVIEW_STEPS = json.load(json_file)
+
+EMR_GET_REC_EMBEDDING_STEPS = {}
+with open("./dags/scripts/emr/get_recommendation_embedding.json") as json_file:
+    EMR_GET_REC_EMBEDDING_STEPS = json.load(json_file)
 
 # DAG definition
 default_args = {
@@ -86,13 +90,24 @@ movie_review_to_raw_data_lake = PythonOperator(
     },
 )
 
-spark_script_to_s3 = PythonOperator(
+spark_random_text_classification_script_to_s3 = PythonOperator(
     dag=dag,
-    task_id="spark_script_to_s3",
+    task_id="spark_random_text_classification_script_to_s3",
     python_callable=_local_to_s3,
     op_kwargs={
         "file_name": "./dags/scripts/spark/random_text_classification.py",
         "key": "scripts/random_text_classification.py",
+        "bucket_name": BUCKET_NAME,
+    },
+)
+
+spark_recommendation_embedding_calculation_script_to_s3 = PythonOperator(
+    dag=dag,
+    task_id="spark_recommendation_embedding_calculation_script_to_s3",
+    python_callable=_local_to_s3,
+    op_kwargs={
+        "file_name": "./dags/scripts/spark/recommendation_embedding_calculation.py",
+        "key": "scripts/recommendation_embedding_calculation.py",
         "bucket_name": BUCKET_NAME,
     },
 )
@@ -102,7 +117,7 @@ start_emr_movie_classification_script = EmrAddStepsOperator(
     task_id="start_emr_movie_classification_script",
     job_flow_id=EMR_ID,
     aws_conn_id="aws_default",
-    steps=EMR_STEPS,
+    steps=EMR_CLEAN_REVIEW_STEPS,
     params={
         "BUCKET_NAME": BUCKET_NAME,
         "raw_movie_review": "raw/movie_review",
@@ -112,7 +127,7 @@ start_emr_movie_classification_script = EmrAddStepsOperator(
     depends_on_past=True,
 )
 
-last_step = len(EMR_STEPS) - 1
+last_step = len(EMR_CLEAN_REVIEW_STEPS) - 1
 
 wait_for_movie_classification_transformation = EmrStepSensor(
     dag=dag,
@@ -124,6 +139,44 @@ wait_for_movie_classification_transformation = EmrStepSensor(
     + "] }}",
     depends_on_past=True,
 )
+
+
+
+
+
+
+
+
+start_emr_embedding_calculation_script = EmrAddStepsOperator(
+    dag=dag,
+    task_id="start_emr_embedding_calculation_script",
+    job_flow_id=EMR_ID,
+    aws_conn_id="aws_default",
+    steps=EMR_GET_REC_EMBEDDING_STEPS,
+    params={
+        "BUCKET_NAME": BUCKET_NAME,
+        "stage_user_purchase": "stage/user_purchase",
+        "text_classifier_script": "scripts/random_text_classifier.py",
+        "stage_movie_review": "stage/movie_review",
+    },
+    depends_on_past=True,
+)
+
+last_step = len(EMR_GET_REC_EMBEDDING_STEPS) - 1
+
+wait_for_embedding_calculation = EmrStepSensor(
+    dag=dag,
+    task_id="wait_for_embedding_calculation",
+    job_flow_id=EMR_ID,
+    step_id='{{ task_instance.xcom_pull\
+        ("start_emr_embedding_calculation_script", key="return_value")['
+    + str(last_step)
+    + "] }}",
+    depends_on_past=True,
+)
+
+
+
 
 generate_user_behavior_metric = PostgresOperator(
     dag=dag,
@@ -137,12 +190,16 @@ end_of_data_pipeline = DummyOperator(task_id="end_of_data_pipeline", dag=dag)
 (
     extract_user_purchase_data
     >> user_purchase_to_stage_data_lake
-    >> user_purchase_stage_data_lake_to_stage_tbl
+    >> spark_recommendation_embedding_calculation_script_to_s3
+    >> [
+        start_emr_embedding_calculation_script >> wait_for_embedding_calculation,
+        user_purchase_stage_data_lake_to_stage_tbl
+    ]
 )
 (
     [
         movie_review_to_raw_data_lake,
-        spark_script_to_s3,
+        spark_random_text_classification_script_to_s3,
     ]
     >> start_emr_movie_classification_script
     >> wait_for_movie_classification_transformation
@@ -153,5 +210,11 @@ end_of_data_pipeline = DummyOperator(task_id="end_of_data_pipeline", dag=dag)
         wait_for_movie_classification_transformation,
     ]
     >> generate_user_behavior_metric
+)
+(
+    [
+        wait_for_embedding_calculation,
+        generate_user_behavior_metric
+    ]
     >> end_of_data_pipeline
 )

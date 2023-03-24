@@ -1,0 +1,27 @@
+[
+  {
+    "Name": "Move data from S3 to HDFS",
+    "ActionOnFailure": "CANCEL_AND_WAIT",
+    "HadoopJarStep": {
+      "Jar": "command-runner.jar",
+      "Args": [
+        "s3-dist-cp",
+        "--src=s3://{{ params.BUCKET_NAME }}/{{ params.stage_user_purchase }}/{{ ds }}/",
+        "--dest=/user_purchase/{{ ds }}"
+      ]
+    }
+  },
+  {
+    "Name": "Calculate recommendation embedding",
+    "ActionOnFailure": "CANCEL_AND_WAIT",
+    "HadoopJarStep": {
+      "Jar": "command-runner.jar",
+      "Args": [
+        "spark-submit",
+        "s3://{{ params.BUCKET_NAME }}/scripts/recommendation_embedding_calculation.py",
+        "--input=/user_purchase/{{ ds }}",
+        "--run-id={{ ds }}"
+      ]
+    }
+  }
+]
