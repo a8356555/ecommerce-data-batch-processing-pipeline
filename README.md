@@ -35,7 +35,6 @@ d. (optional) use singlestore https://medium.com/@VeryFatBoy/using-singlestore-s
 
 ### 2. Recommendataion api serving 
 a. Build a real-time recommendation api using fastapi and elasticsearch or singlestore 
-  * #TODO: dockerize and how did container request elasticsearch on EMR?
 
 ### 3. Spark data skew analysis and optimization
 * #TODO
